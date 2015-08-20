@@ -25,13 +25,11 @@ public class SortTest {
 	
 	@Test
 	public final void sortHugeAmountOfNumbers() {
-		int size = 50000000;
-		int[] unsorted = new int[size];
-		Random random = new Random();
-		for (int i = 0; i < size; i++) {
-			unsorted[i] = random.nextInt(size);
-		}
+		int size = 100000000;
+		int[] unsorted = buildUnsortedArray(size);
+		long startTime = System.currentTimeMillis();
 		Sort.quicksort(unsorted);
+		System.out.println("Elapsed: " + (System.currentTimeMillis() - startTime));
 		Assert.assertTrue(isSorted(unsorted));
 	}
 	
@@ -52,5 +50,26 @@ public class SortTest {
 		Assert.assertTrue(isSorted(sorted));
 		Sort.quicksort(sorted);
 		Assert.assertTrue(isSorted(sorted));
+	}
+	
+	@Test
+	public final void sortHugeAmountOfNumbersInParallel() {
+		int size = 100000000;
+		int amountOfWorkers = 8;
+		int maxPartitioningLevels = 15;
+		int[] unsorted = buildUnsortedArray(size);
+		long startTime = System.currentTimeMillis();
+		Sort.parallelQuicksort(unsorted, amountOfWorkers, maxPartitioningLevels);
+		System.out.println("Elapsed: " + (System.currentTimeMillis() - startTime));
+		Assert.assertTrue(isSorted(unsorted));
+	}
+	
+	private int[] buildUnsortedArray(int size) {
+		int[] unsorted = new int[size];
+		Random random = new Random();
+		for (int i = 0; i < size; i++) {
+			unsorted[i] = random.nextInt(size);
+		}
+		return unsorted;
 	}
 }

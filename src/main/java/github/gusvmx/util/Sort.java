@@ -1,8 +1,15 @@
 package github.gusvmx.util;
 
+/**
+ * @author gus
+ *
+ */
 public class Sort {
 
-	public static void quicksort(int[] unsorted) {
+	/**
+	 * @param unsorted The array to sort.
+	 */
+	public static void quicksort(final int[] unsorted) {
 		quicksort(unsorted, 0, unsorted.length - 1);
 	}
 	
@@ -15,7 +22,7 @@ public class Sort {
 	 * @param startIndex The start index to sort
 	 * @param endIndex The end index to sort
 	 */
-	private static void quicksort(int[] array, int startIndex, int endIndex) {
+	public static void quicksort(final int[] array, final int startIndex, final int endIndex) {
 		if (startIndex < endIndex) {
 			int pivotIndex = partition(array, startIndex, endIndex);
 			quicksort(array, startIndex, pivotIndex - 1);
@@ -33,7 +40,7 @@ public class Sort {
 	 * @param endIndex The end index.
 	 * @return The final pivot index that divides the less or equal elements and the greater elements than the pivot. 
 	 */
-	private static int partition(int[] array, int startIndex, int endIndex) {
+	public static int partition(final int[] array, final int startIndex, final int endIndex) {
 		int pivotChosenIndex = endIndex;
 		int pivot = array[pivotChosenIndex];
 		int pivotFinalIndex = startIndex;
@@ -55,10 +62,29 @@ public class Sort {
 	 * @param i The first position to switch
 	 * @param j The second position to switch.
 	 */
-	private static void swap(int[] array, int i, int j) {
+	private static void swap(final int[] array, final int i, final int j) {
 		int temp = array[i];
 		array[i] = array[j];
 		array[j] = temp;
+	}
+
+	/**
+	 * @param unsorted
+	 * @param amountOfWorkers
+	 */
+	public static void parallelQuicksort(final int[] unsorted, final int amountOfWorkers, final int partitioningLevels) {
+		PartitionDispatcher dispatcher = new PartitionDispatcher(amountOfWorkers);
+		
+		Partition partition = new Partition(unsorted, 0, unsorted.length - 1, 1);
+		dispatcher.sortWhenAWorkerIsAvailable(partition);
+		
+		for (int i = 0; i < amountOfWorkers; i++) {
+			QuicksortWorker worker = new QuicksortWorker(dispatcher, partitioningLevels);
+			Thread thread = new Thread(worker);
+			thread.start();
+		}
+		
+		dispatcher.waitUntilFullySorted();
 	}
 
 }
